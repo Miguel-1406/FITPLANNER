@@ -12,7 +12,8 @@ def iniciar_banco():
                    id INTEGER PRIMARY KEY AUTOINCREMENT,
                    nome TEXT NOT NULL,
                    tipo TEXT,
-                   objetivo TEXT
+                   objetivo TEXT,
+                   data_criacao TEXT NOT NULL
                    )
                ''')
     conexao.commit()
@@ -33,6 +34,7 @@ def menu_gerenciar_treinos():
         print("=== GERENCIAR TREINOS ===")
         print("1. Cadastrar Novo Treino")
         print("2. Listar Meus Treinos")
+        print("3. Deletar Treino")
         print("0. Voltar")
         
         escolha = input("\n-> ")
@@ -40,9 +42,11 @@ def menu_gerenciar_treinos():
             nome = input("Nome do Treino (ex: Treino A): ")
             tipo = input("Tipo (ex: Musculação/Cardio): ")
             objetivo = input("Objetivo (ex: Ganhar Massa Muscular): ")
+            data_criacao = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
             con = sqlite3.connect('fitplanner.db')
+
             cur = con.cursor()
-            cur.execute("INSERT INTO treinos (nome, tipo, objetivo) VALUES (?, ?, ?)", (nome, tipo, objetivo))
+            cur.execute("INSERT INTO treinos (nome, tipo, objetivo, data_criacao) VALUES (?, ?, ?, ?)", (nome, tipo, objetivo, data_criacao))
             con.commit()
             con.close()
             print("\nTreino cadastrado com sucesso!")
@@ -50,14 +54,23 @@ def menu_gerenciar_treinos():
         elif escolha == '2':
             con = sqlite3.connect('fitplanner.db')
             cur = con.cursor()
-            cur.execute("SELECT id, nome, tipo FROM treinos")
+            cur.execute("SELECT id, nome, tipo, data_criacao FROM treinos")
             dados = cur.fetchall()
             con.close()
             
             print("\n--- SEUS TREINOS ---")
             for linha in dados:
-                print(f"ID: {linha[0]} | Nome: {linha[1]} | Tipo: {linha[2]}")
+                print(f"ID: {linha[0]} | Nome: {linha[1]} | Tipo: {linha[2]} | Data de Criação: {linha[3]}")
             input("\nPressione Enter para voltar...")
+        elif escolha == '3':
+            id_treino = input("Digite o ID do treino que deseja deletar: ")
+            con = sqlite3.connect('fitplanner.db')
+            cur = con.cursor()
+            cur.execute("DELETE FROM treinos WHERE id = ?", (id_treino,))
+            con.commit()
+            con.close()
+            print("\nTreino deletado com sucesso!")
+            input("Pressione Enter...")
         elif escolha == '0':
             break
 def cadastrar_exercicio():
