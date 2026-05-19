@@ -1,0 +1,630 @@
+
+
+<!-- FRONT END BEM PEBA  -->
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>FitPlanner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --card: #1e1e1e;
+      --border: #2a2a2a;
+      --accent: #c8f135;
+      --accent-dim: #9cb82a;
+      --text: #f0f0f0;
+      --muted: #777;
+      --danger: #ff4444;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 3px;
+      color: var(--accent);
+    }
+
+    nav {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    nav button {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    nav button:hover, nav button.active {
+      background: var(--card);
+      color: var(--accent);
+    }
+
+    /* LAYOUT */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 2rem;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* PAGE TITLE */
+    .page-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 3rem;
+      letter-spacing: 2px;
+      margin-bottom: 0.25rem;
+    }
+
+    .page-title span { color: var(--accent); }
+
+    .page-sub {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+
+    /* GRID */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (max-width: 700px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    /* CARD */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+    }
+
+    .card h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.4rem;
+      letter-spacing: 1px;
+      margin-bottom: 1.2rem;
+      color: var(--accent);
+    }
+
+    /* FORM */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.95rem;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+    }
+
+    select option { background: var(--surface); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.4rem;
+      border-radius: 8px;
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      width: 100%;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+
+    .btn-primary:hover { background: var(--accent-dim); }
+
+    .btn-danger {
+      background: transparent;
+      border: 1px solid var(--danger);
+      color: var(--danger);
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-danger:hover { background: var(--danger); color: #fff; }
+
+    /* TREINO LIST */
+    .treino-list { display: flex; flex-direction: column; gap: 1rem; }
+
+    .treino-item {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color 0.2s;
+      cursor: pointer;
+    }
+
+    .treino-item:hover { border-color: var(--accent); }
+    .treino-item.selected { border-color: var(--accent); background: #1f2210; }
+
+    .treino-info h4 {
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 0.2rem;
+    }
+
+    .treino-info p {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .treino-badges {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.4rem;
+    }
+
+    .badge {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.2rem 0.6rem;
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .treino-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+    /* EXERCICIOS */
+    .exercicio-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.8rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+    }
+
+    .exercicio-info { font-size: 0.9rem; }
+    .exercicio-info small { color: var(--muted); font-size: 0.78rem; }
+
+    .ex-stats {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* EMPTY STATE */
+    .empty {
+      text-align: center;
+      padding: 3rem;
+      color: var(--muted);
+    }
+
+    .empty .icon { font-size: 3rem; margin-bottom: 1rem; }
+
+    /* TOAST */
+    #toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--accent);
+      color: #000;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 999;
+    }
+
+    #toast.show { transform: translateY(0); opacity: 1; }
+    #toast.error { background: var(--danger); color: #fff; }
+
+    /* SECTION DIVIDER */
+    .section-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.5rem 0;
+    }
+
+    /* SPINNER */
+    .spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* SELECTED TREINO PANEL */
+    #painel-exercicios {
+      margin-top: 1.5rem;
+      display: none;
+    }
+
+    #painel-exercicios.visible { display: block; }
+
+    .painel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .painel-header h3 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.5rem;
+      letter-spacing: 1px;
+    }
+
+    .painel-header span { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">FitPlanner</div>
+  <nav>
+    <button class="active" onclick="showPage('treinos')">Treinos</button>
+    <button onclick="showPage('exercicios')">Exercícios</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- PAGE: TREINOS -->
+  <div class="page active" id="page-treinos">
+    <div class="page-title">MEUS <span>TREINOS</span></div>
+    <div class="page-sub">Gerencie seus planos de treino</div>
+
+    <div class="grid-2">
+      <!-- FORM -->
+      <div class="card">
+        <h3>Novo Treino</h3>
+        <div class="form-group">
+          <label>Nome do Treino</label>
+          <input type="text" id="treino-nome" placeholder="ex: Treino A"/>
+        </div>
+        <div class="form-group">
+          <label>Tipo</label>
+          <input type="text" id="treino-tipo" placeholder="ex: Musculação, Cardio"/>
+        </div>
+        <div class="form-group">
+          <label>Objetivo</label>
+          <input type="text" id="treino-objetivo" placeholder="ex: Ganhar Massa Muscular"/>
+        </div>
+        <button class="btn btn-primary" onclick="cadastrarTreino()">+ Cadastrar Treino</button>
+      </div>
+
+      <!-- LIST -->
+      <div>
+        <div class="section-label">Treinos Cadastrados</div>
+        <div id="lista-treinos" class="treino-list">
+          <div class="empty"><div class="icon">🏋️</div><p>Nenhum treino ainda</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXERCICIOS DO TREINO -->
+    <div id="painel-exercicios">
+      <hr class="divider"/>
+      <div class="painel-header">
+        <h3>Exercícios — <span id="nome-treino-selecionado"></span></h3>
+      </div>
+      <div id="lista-exercicios-treino"></div>
+    </div>
+  </div>
+
+  <!-- PAGE: EXERCICIOS -->
+  <div class="page" id="page-exercicios">
+    <div class="page-title">CADASTRAR <span>EXERCÍCIO</span></div>
+    <div class="page-sub">Adicione exercícios a um treino existente</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Novo Exercício</h3>
+        <div class="form-group">
+          <label>Treino</label>
+          <select id="ex-treino">
+            <option value="">Selecione um treino...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Nome do Exercício</label>
+          <input type="text" id="ex-nome" placeholder="ex: Supino Reto"/>
+        </div>
+        <div class="form-group">
+          <label>Séries</label>
+          <input type="text" id="ex-series" placeholder="ex: 4"/>
+        </div>
+        <div class="form-group">
+          <label>Repetições</label>
+          <input type="text" id="ex-reps" placeholder="ex: 10-12"/>
+        </div>
+        <button class="btn btn-primary" onclick="cadastrarExercicio()">+ Cadastrar Exercício</button>
+      </div>
+
+      <div>
+        <div class="section-label">Todos os Exercícios</div>
+        <div id="lista-todos-exercicios">
+          <div class="empty"><div class="icon">💪</div><p>Nenhum exercício ainda</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<div id="toast"></div>
+
+<script>
+  const API = 'http://localhost:5000';
+  let treinoSelecionado = null;
+
+  // NAV
+  function showPage(nome) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + nome).classList.add('active');
+    event.target.classList.add('active');
+    if (nome === 'exercicios') carregarSelectTreinos();
+    if (nome === 'exercicios') carregarTodosExercicios();
+  }
+
+  // TOAST
+  function toast(msg, tipo = 'ok') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = tipo === 'error' ? 'show error' : 'show';
+    setTimeout(() => t.className = '', 3000);
+  }
+
+  // CARREGAR TREINOS
+  async function carregarTreinos() {
+    const res = await fetch(`${API}/treinos`);
+    const treinos = await res.json();
+    const lista = document.getElementById('lista-treinos');
+
+    if (treinos.length === 0) {
+      lista.innerHTML = '<div class="empty"><div class="icon">🏋️</div><p>Nenhum treino ainda</p></div>';
+      return;
+    }
+
+    lista.innerHTML = treinos.map(t => `
+      <div class="treino-item ${treinoSelecionado === t.id ? 'selected' : ''}" onclick="selecionarTreino(${t.id}, '${t.nome}')">
+        <div class="treino-info">
+          <h4>${t.nome}</h4>
+          <div class="treino-badges">
+            <span class="badge">${t.tipo || '—'}</span>
+            <span class="badge">${t.objetivo || '—'}</span>
+          </div>
+          <p>${t.data_criacao}</p>
+        </div>
+        <div class="treino-actions">
+          <button class="btn btn-danger" onclick="event.stopPropagation(); deletarTreino(${t.id})">Deletar</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // CADASTRAR TREINO
+  async function cadastrarTreino() {
+    const nome = document.getElementById('treino-nome').value.trim();
+    const tipo = document.getElementById('treino-tipo').value.trim();
+    const objetivo = document.getElementById('treino-objetivo').value.trim();
+
+    if (!nome) return toast('Informe o nome do treino', 'error');
+
+    const res = await fetch(`${API}/treinos`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome, tipo, objetivo })
+    });
+
+    if (res.ok) {
+      toast('Treino cadastrado!');
+      document.getElementById('treino-nome').value = '';
+      document.getElementById('treino-tipo').value = '';
+      document.getElementById('treino-objetivo').value = '';
+      carregarTreinos();
+    } else {
+      toast('Erro ao cadastrar', 'error');
+    }
+  }
+
+  // DELETAR TREINO
+  async function deletarTreino(id) {
+    if (!confirm('Deletar este treino e todos os seus exercícios?')) return;
+    const res = await fetch(`${API}/treinos/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      toast('Treino deletado!');
+      if (treinoSelecionado === id) {
+        treinoSelecionado = null;
+        document.getElementById('painel-exercicios').classList.remove('visible');
+      }
+      carregarTreinos();
+    } else {
+      toast('Erro ao deletar', 'error');
+    }
+  }
+
+  // SELECIONAR TREINO
+  async function selecionarTreino(id, nome) {
+    treinoSelecionado = id;
+    document.getElementById('nome-treino-selecionado').textContent = nome;
+    document.getElementById('painel-exercicios').classList.add('visible');
+    carregarTreinos();
+
+    const res = await fetch(`${API}/exercicios/treino/${id}`);
+    const exercicios = await res.json();
+    const lista = document.getElementById('lista-exercicios-treino');
+
+    if (exercicios.length === 0) {
+      lista.innerHTML = '<div class="empty"><div class="icon">💪</div><p>Nenhum exercício neste treino</p></div>';
+      return;
+    }
+
+    lista.innerHTML = exercicios.map(e => `
+      <div class="exercicio-item">
+        <div class="exercicio-info">
+          <div>${e.nome_exercicio}</div>
+        </div>
+        <div class="ex-stats">
+          <span>${e.series} séries</span>
+          <span>${e.repeticoes} reps</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // CARREGAR SELECT DE TREINOS
+  async function carregarSelectTreinos() {
+    const res = await fetch(`${API}/treinos`);
+    const treinos = await res.json();
+    const sel = document.getElementById('ex-treino');
+    sel.innerHTML = '<option value="">Selecione um treino...</option>' +
+      treinos.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
+  }
+
+  // CADASTRAR EXERCICIO
+  async function cadastrarExercicio() {
+    const id_treino = document.getElementById('ex-treino').value;
+    const nome_exercicio = document.getElementById('ex-nome').value.trim();
+    const series = document.getElementById('ex-series').value.trim();
+    const repeticoes = document.getElementById('ex-reps').value.trim();
+
+    if (!id_treino) return toast('Selecione um treino', 'error');
+    if (!nome_exercicio) return toast('Informe o nome do exercício', 'error');
+
+    const res = await fetch(`${API}/exercicios`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id_treino, nome_exercicio, series, repeticoes })
+    });
+
+    if (res.ok) {
+      toast('Exercício cadastrado!');
+      document.getElementById('ex-nome').value = '';
+      document.getElementById('ex-series').value = '';
+      document.getElementById('ex-reps').value = '';
+      carregarTodosExercicios();
+    } else {
+      toast('Erro ao cadastrar', 'error');
+    }
+  }
+
+  // CARREGAR TODOS EXERCICIOS
+  async function carregarTodosExercicios() {
+    const res = await fetch(`${API}/exercicios`);
+    const exercicios = await res.json();
+    const lista = document.getElementById('lista-todos-exercicios');
+
+    if (exercicios.length === 0) {
+      lista.innerHTML = '<div class="empty"><div class="icon">💪</div><p>Nenhum exercício ainda</p></div>';
+      return;
+    }
+
+    lista.innerHTML = exercicios.map(e => `
+      <div class="exercicio-item">
+        <div class="exercicio-info">
+          <div>${e.nome_exercicio}</div>
+          <small>Treino ID: ${e.id_treino}</small>
+        </div>
+        <div class="ex-stats">
+          <span>${e.series} séries</span>
+          <span>${e.repeticoes} reps</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // INIT
+  carregarTreinos();
+</script>
+</body>
+</html>

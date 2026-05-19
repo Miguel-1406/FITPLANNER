@@ -3,9 +3,13 @@ import os
 from datetime import datetime
 def limpar_tela():
     os.system('cls' if os.name == 'nt' else 'clear')
+    
 def iniciar_banco():
     conexao = sqlite3.connect('fitplanner.db')
     cursor = conexao.cursor()
+    
+    # vai criar conexão entre treino e exercicio
+    cursor.execute("PRAGMA foreign_keys = ON")
     
     cursor.execute('''
                    CREATE TABLE IF NOT EXISTS treinos (
@@ -16,18 +20,21 @@ def iniciar_banco():
                    data_criacao TEXT NOT NULL
                    )
                ''')
-    conexao.commit()
+    
     cursor.execute('''
-                   CREATE TABLE IF NOT EXISTS exercicios (
-                   id INTEGER PRIMARY KEY AUTOINCREMENT,
-                   id_treino INTEGER NOT NULL,
-                   nome_exercicio TEXT NOT NULL,
-                   series TEXT,
-                   repeticoes TEXT
-                   )
-               ''')
+    CREATE TABLE IF NOT EXISTS exercicios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id_treino INTEGER NOT NULL,
+        nome_exercicio TEXT NOT NULL,
+        series TEXT,
+        repeticoes TEXT,
+        FOREIGN KEY (id_treino) REFERENCES treinos(id) ON DELETE CASCADE ON UPDATE CASCADE
+    )
+''')
+    
     conexao.commit()
     conexao.close()
+    
 def menu_gerenciar_treinos():
     while True:
         limpar_tela()
@@ -62,15 +69,20 @@ def menu_gerenciar_treinos():
             for linha in dados:
                 print(f"ID: {linha[0]} | Nome: {linha[1]} | Tipo: {linha[2]} | Data de Criação: {linha[3]}")
             input("\nPressione Enter para voltar...")
+            
+            # (Siqueira) --> ajeitei o bug de deletar ja que o delete no treino n tava deletando os exercicios junto
+            
         elif escolha == '3':
             id_treino = input("Digite o ID do treino que deseja deletar: ")
             con = sqlite3.connect('fitplanner.db')
             cur = con.cursor()
+            cur.execute("PRAGMA foreign_keys = ON") #faz com que qnd eu exclua o treino ele automaticamente exclui o exercicio
             cur.execute("DELETE FROM treinos WHERE id = ?", (id_treino,))
             con.commit()
             con.close()
             print("\nTreino deletado com sucesso!")
             input("Pressione Enter...")
+            
         elif escolha == '0':
             break
 def cadastrar_exercicio():
