@@ -3,6 +3,13 @@ import os
 from datetime import datetime
 def limpar_tela():
     os.system('cls' if os.name == 'nt' else 'clear')
+
+def input_numero(mensagem):
+    while True:
+        try:
+            return int(input(mensagem).strip())
+        except ValueError:
+            print("[!] Digite apenas numeros inteiros.")
     
 def iniciar_banco():
     conexao = sqlite3.connect('fitplanner.db')
@@ -72,10 +79,10 @@ def menu_gerenciar_treinos():
             # (Siqueira) --> ajeitei o bug de deletar ja que o delete no treino n tava deletando os exercicios junto
             
         elif escolha == '3':
-            id_treino = input("Digite o ID do treino que deseja deletar: ")
+            id_treino = input_numero("Digite o ID do treino que deseja deletar: ")
             con = sqlite3.connect('fitplanner.db')
             cur = con.cursor()
-            cur.execute("PRAGMA foreign_keys = ON") #faz com que qnd eu exclua o treino ele automaticamente exclui o exercicio
+            cur.execute("PRAGMA foreign_keys = ON")
             cur.execute("DELETE FROM treinos WHERE id = ?", (id_treino,))
             con.commit()
             con.close()
@@ -88,7 +95,7 @@ def cadastrar_exercicio():
     nome_exercicio = input("Nome do Exercício: ")
     series = input("Series (ex: 3/5): ")
     repeticoes = input("Repetições (ex: 10/12): ")
-    id_treino = input("A qual treino este exercício pertence? (Digite o ID do treino): ")
+    id_treino = input_numero("A qual treino este exercício pertence? (Digite o ID do treino): ")
     con = sqlite3.connect('fitplanner.db')
     cur = con.cursor()
     cur.execute("INSERT INTO exercicios (id_treino, nome_exercicio, series, repeticoes) VALUES (?, ?, ?, ?)", (id_treino, nome_exercicio, series, repeticoes))
