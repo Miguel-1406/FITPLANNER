@@ -8,7 +8,6 @@ def iniciar_banco():
     conexao = sqlite3.connect('fitplanner.db')
     cursor = conexao.cursor()
     
-    # vai criar conexão entre treino e exercicio
     cursor.execute("PRAGMA foreign_keys = ON")
     
     cursor.execute('''
@@ -104,7 +103,7 @@ while True:
     print("Escolha o que deseja realizar: ")
     print(" 1-Gerenciar Planos de treino\n 2-Cadastrar Exercicios\n 3-Controle de Metas\n 4-Acompanhar \n 5-Sugestões Personalizadas\n 6-Extra")
     opcao = input(" ->")
-    # Lógica de Navegação
+    
     if opcao == '1':
         menu_gerenciar_treinos()
     elif opcao == '2':
@@ -114,17 +113,17 @@ while True:
 
     elif opcao == '3':
         print("\n--- Controle de Metas ---")
-        # Espaço para o Membro 4 trabalhar
+        
         input("\nPressione Enter para voltar...")
 
     elif opcao == '4':
         print("\n--- Acompanhamento de Evolução ---")
-        # Espaço para o Membro 4 trabalhar
+        
         input("\nPressione Enter para voltar...")
 
     elif opcao == '5':
         print("\n--- Sugestões Personalizadas ---")
-        # Espaço para o Membro 5 trabalhar
+        
         input("\nPressione Enter para voltar...")
 
     elif opcao == '6':
@@ -133,7 +132,7 @@ while True:
 
     elif opcao == '0':
         print("Saindo do sistema... Bom treino!")
-        break # Este é o comando que encerra o programa
+        break 
 
     else:
         print("Opção inválida! Tente novamente.")
