@@ -38,6 +38,17 @@ def iniciar_banco():
                     FOREIGN KEY (id_treino) REFERENCES treinos(id) ON DELETE CASCADE ON UPDATE CASCADE
                 )
             ''')
+            cursor.execute('''
+                 CREATE TABLE IF NOT EXISTS metas (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    titulo TEXT NOT NULL,
+                    valor_atual REAL,
+                    valor_meta REAL NOT NULL,
+                    unidade TEXT,
+                    concluida INTEGER DEFAULT 0,
+                    data_criacao TEXT NOT NULL
+                 )
+            ''')
             conexao.commit()
     except sqlite3.Error as e:
         print(f"[!] Erro crítico ao inicializar o banco de dados: {e}")
@@ -298,6 +309,92 @@ def menu_editar():
             
         elif escolha == '0':
             break
+def menu_metas():
+     while True:
+        limpar_tela()
+
+        print("=== CONTROLE DE METAS ===")
+        print("1. Criar Meta")
+        print("2. Listar Metas")
+        print("3. Atualizar Progresso")
+        print("4. Concluir Meta")
+        print("5. Deletar Meta")
+        print("0. Voltar")
+
+        opcao = input("\n-> ")
+
+        if opcao == '1':
+            criar_meta()
+
+        elif opcao == '2':
+            listar_metas()
+
+        elif opcao == '3':
+            atualizar_meta()
+
+        elif opcao == '4':
+            concluir_meta()
+
+        elif opcao == '5':
+            deletar_meta()
+
+        elif opcao == '0':
+            break
+def criar_meta():
+    limpar_tela()
+
+    titulo = input("Nome da Meta: ").strip()
+    unidade = input("Unidade (kg/km/%): ").strip()
+    valor_atual = float(input("Valor Atual: "))
+    valor_meta = float(input("Valor da Meta: "))
+    data = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+
+    try:
+        with sqlite3.connect('fitplanner.db') as con:
+            cur = con.cursor()
+
+            cur.execute("SELECT id FROM metas WHERE titulo = ?", (titulo,))
+            if cur.fetchone():
+                print("\n[!] Já existe uma meta com este nome.")
+                input("\nPressione Enter...")
+                return
+
+            cur.execute("""
+                INSERT INTO metas
+                (titulo, valor_atual, valor_meta, unidade, data_criacao)
+                VALUES (?, ?, ?, ?, ?)
+            """, (titulo, valor_atual, valor_meta, unidade, data))
+            con.commit()
+            print("\nMeta criada com sucesso!")
+
+    except sqlite3.Error as e:
+        print(f"\nErro: {e}")
+
+    input("\nPressione Enter...")
+
+
+    listar_metas()
+
+    try:
+        titulo = input("\nNome da meta para deletar: ").strip()
+
+        with sqlite3.connect('fitplanner.db') as con:
+            cur = con.cursor()
+
+            cur.execute("SELECT id FROM metas WHERE titulo = ?", (titulo,))
+            if not cur.fetchone():
+                print("[!] Meta não encontrada.")
+                input("\nPressione Enter...")
+                return
+
+            cur.execute("DELETE FROM metas WHERE titulo = ?", (titulo,))
+            con.commit()
+            print("\nMeta deletada!")
+
+    except Exception as e:
+        print(f"\nErro: {e}")
+
+    input("\nPressione Enter...")
 
 iniciar_banco()
 
@@ -323,8 +420,7 @@ while True:
     elif opcao == '3':
         menu_editar()
     elif opcao == '4':
-        print("\n--- Controle de Metas ---")
-        input("\nPressione Enter para voltar...")
+        menu_metas()
     elif opcao == '5':
         print("\n--- Acompanhamento de Evolução ---")
         input("\nPressione Enter para voltar...")
