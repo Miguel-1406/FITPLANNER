@@ -372,6 +372,77 @@ def criar_meta():
 
     input("\nPressione Enter...")
 
+def listar_metas():
+    limpar_tela()
+
+    try:
+        with sqlite3.connect('fitplanner.db') as con:
+            cur = con.cursor()
+
+            cur.execute("""
+                SELECT titulo, valor_atual,
+                valor_meta, unidade, concluida
+                FROM metas
+            """)
+
+            metas = cur.fetchall()
+
+            print("\n=== SUAS METAS ===")
+
+            if not metas:
+                print("Nenhuma meta cadastrada.")
+
+            else:
+                for meta in metas:
+                    porcentagem = (meta[1] / meta[2]) * 100
+
+                    if porcentagem > 100:
+                        porcentagem = 100
+
+                    status = "Concluída" if meta[4] else "Em andamento"
+
+                    print(f"""
+Meta: {meta[0]}
+Progresso: {meta[1]} / {meta[2]} {meta[3]}
+Conclusão: {porcentagem:.1f}%
+Status: {status}
+------------------------
+""")
+
+    except sqlite3.Error as e:
+        print(f"\nErro: {e}")
+
+    input("\nPressione Enter...")
+
+
+def atualizar_meta():
+    listar_metas()
+
+    try:
+        titulo = input("\nNome da meta a atualizar: ").strip()
+        novo_valor = float(input("Novo valor atual: "))
+
+        with sqlite3.connect('fitplanner.db') as con:
+            cur = con.cursor()
+
+            cur.execute("SELECT id FROM metas WHERE titulo = ?", (titulo,))
+            if not cur.fetchone():
+                print("[!] Meta não encontrada.")
+                input("\nPressione Enter...")
+                return
+
+            cur.execute("""
+                UPDATE metas SET valor_atual = ? WHERE titulo = ?
+            """, (novo_valor, titulo))
+            con.commit()
+            print("\nMeta atualizada!")
+
+    except Exception as e:
+        print(f"\nErro: {e}")
+
+    input("\nPressione Enter...")
+
+
 
     listar_metas()
 
