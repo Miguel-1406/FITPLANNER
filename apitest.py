@@ -29,6 +29,19 @@ def iniciar_banco():
                     FOREIGN KEY (id_treino) REFERENCES treinos(id) ON DELETE CASCADE ON UPDATE CASCADE
                 )
             ''')
+            cur.execute('''
+                 CREATE TABLE IF NOT EXISTS metas (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    titulo TEXT NOT NULL UNIQUE,
+                    valor_inicial REAL DEFAULT 0,
+                    valor_atual REAL,
+                    valor_meta REAL NOT NULL,
+                    unidade TEXT,
+                    tipo_meta TEXT DEFAULT 'ganhar',
+                    concluida INTEGER DEFAULT 0,
+                    data_criacao TEXT NOT NULL
+                 )
+            ''')
             con.commit()
     except sqlite3.Error as e:
         print(f"Erro ao iniciar banco: {e}")
@@ -77,7 +90,7 @@ def adicionar_treino():
     cursor.execute("SELECT id FROM treinos WHERE nome = ?", (nome,))
     if cursor.fetchone():
         con.close()
-        return jsonify({"mensagem": "Já existe um treino com este nome. Escolha um nome exclusivo."}), 400
+        return jsonify({"mensagem": "Já existe um treino com este nome."}), 400
         
     cursor.execute("INSERT INTO treinos (nome, tipo, objetivo, data_criacao) VALUES (?, ?, ?, datetime('now'))", (nome, tipo, objetivo))
     con.commit()
@@ -194,7 +207,7 @@ def atualizar_exercicio(id):
                    (nome_exercicio, series, repeticoes, id))
     con.commit()
     con.close()
-    return jsonify({"mensagem": "Exercício atualizado com sucesso!"})
+    return jsonify({"mensagem": "Exercício updated com sucesso!"})
 
 @app.route('/exercicios/<int:id>', methods=['DELETE'])
 def deletar_exercicio(id):
@@ -209,6 +222,88 @@ def deletar_exercicio(id):
     con.commit()
     con.close()
     return jsonify({"mensagem": "Exercício deletado com sucesso!"})
+
+@app.route('/metas', methods=['GET'])
+def obter_metas():
+    con = obter_conexao()
+    cursor = con.cursor()
+    cursor.execute('SELECT * FROM metas')
+    linhas = cursor.fetchall()
+    con.close()
+    return jsonify([dict(linha) for linha in linhas])
+
+@app.route('/metas', methods=['POST'])
+def adicionar_meta():
+    dados = request.json
+    if not dados or 'titulo' not in dados or 'valor_meta' not in dados:
+        return jsonify({"mensagem": "Campos 'titulo' e 'valor_meta' são obrigatórios."}), 400
+        
+    titulo = dados['titulo'].strip()
+    unidade = dados.get('unidade', '').strip()
+    valor_inicial = float(dados.get('valor_atual', 0))
+    valor_atual = valor_inicial
+    valor_meta = float(dados['valor_meta'])
+    tipo_meta = dados.get('tipo_meta', 'ganhar')
+    
+    if tipo_meta == 'perder':
+        concluida = 1 if valor_atual <= valor_meta else 0
+    else:
+        concluida = 1 if valor_atual >= valor_meta else 0
+    
+    con = obter_conexao()
+    cursor = con.cursor()
+    
+    cursor.execute("SELECT id FROM metas WHERE titulo = ?", (titulo,))
+    if cursor.fetchone():
+        con.close()
+        return jsonify({"mensagem": "Já existe uma meta com este nome."}), 400
+        
+    cursor.execute("INSERT INTO metas (titulo, valor_inicial, valor_atual, valor_meta, unidade, tipo_meta, concluida, data_criacao) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))",
+                   (titulo, valor_inicial, valor_atual, valor_meta, unidade, tipo_meta, concluida))
+    con.commit()
+    con.close()
+    return jsonify({"mensagem": "Meta criada com sucesso!"}), 201
+
+@app.route('/metas/<int:id>', methods=['PUT'])
+def atualizar_meta(id):
+    dados = request.json
+    if not dados or 'valor_atual' not in dados:
+        return jsonify({"mensagem": "O campo 'valor_atual' é obrigatório."}), 400
+        
+    novo_valor = float(dados['valor_atual'])
+    
+    con = obter_conexao()
+    cursor = con.cursor()
+    
+    cursor.execute("SELECT valor_meta, tipo_meta FROM metas WHERE id = ?", (id,))
+    meta = cursor.fetchone()
+    if not meta:
+        con.close()
+        return jsonify({"mensagem": "Meta não encontrada."}), 404
+        
+    if meta['tipo_meta'] == 'perder':
+        concluida = 1 if novo_valor <= float(meta['valor_meta']) else 0
+    else:
+        concluida = 1 if novo_valor >= float(meta['valor_meta']) else 0
+    
+    cursor.execute("UPDATE metas SET valor_atual = ?, concluida = ? WHERE id = ?", (novo_valor, concluida, id))
+    con.commit()
+    con.close()
+    return jsonify({"mensagem": "Progresso da meta atualizado!"})
+
+@app.route('/metas/<int:id>', methods=['DELETE'])
+def deletar_meta(id):
+    con = obter_conexao()
+    cursor = con.cursor()
+    cursor.execute("SELECT id FROM metas WHERE id = ?", (id,))
+    if not cursor.fetchone():
+        con.close()
+        return jsonify({"mensagem": "Meta não encontrada."}), 404
+        
+    cursor.execute("DELETE FROM metas WHERE id = ?", (id,))
+    con.commit()
+    con.close()
+    return jsonify({"mensagem": "Meta deletada com sucesso!"})
 
 if __name__ == '__main__':
     app.run(port=5000, host='localhost', debug=True)
