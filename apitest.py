@@ -77,12 +77,42 @@ def adicionar_treino():
     cursor.execute("SELECT id FROM treinos WHERE nome = ?", (nome,))
     if cursor.fetchone():
         con.close()
-        return jsonify({"mensagem": "Já existe um treino com este nome."}), 400
+        return jsonify({"mensagem": "Já existe um treino com este nome. Escolha um nome exclusivo."}), 400
         
     cursor.execute("INSERT INTO treinos (nome, tipo, objetivo, data_criacao) VALUES (?, ?, ?, datetime('now'))", (nome, tipo, objetivo))
     con.commit()
     con.close()
     return jsonify({"mensagem": "Treino cadastrado com sucesso!"}), 201
+
+@app.route('/treinos/<int:id>', methods=['PUT'])
+def atualizar_treino(id):
+    dados = request.json
+    if not dados:
+        return jsonify({"mensagem": "Dados inválidos."}), 400
+        
+    con = obter_conexao()
+    cursor = con.cursor()
+    
+    cursor.execute("SELECT nome FROM treinos WHERE id = ?", (id,))
+    treino_atual = cursor.fetchone()
+    if not treino_atual:
+        con.close()
+        return jsonify({"mensagem": "Treino não encontrado."}), 404
+        
+    nome = dados.get('nome', treino_atual['nome']).strip().upper()
+    tipo = dados.get('tipo', '').strip()
+    objetivo = dados.get('objetivo', '').strip()
+    
+    if nome != treino_atual['nome']:
+        cursor.execute("SELECT id FROM treinos WHERE nome = ? AND id != ?", (nome, id))
+        if cursor.fetchone():
+            con.close()
+            return jsonify({"mensagem": "Já existe outro treino com esse nome."}), 400
+            
+    cursor.execute("UPDATE treinos SET nome = ?, tipo = ?, objetivo = ? WHERE id = ?", (nome, tipo, objetivo, id))
+    con.commit()
+    con.close()
+    return jsonify({"mensagem": "Treino atualizado com sucesso!"})
 
 @app.route('/treinos/<int:id>', methods=['DELETE'])
 def deletar_treino(id):
@@ -140,6 +170,45 @@ def adicionar_exercicio():
     con.commit()
     con.close()
     return jsonify({"mensagem": "Exercício cadastrado com sucesso!"}), 201
+
+@app.route('/exercicios/<int:id>', methods=['PUT'])
+def atualizar_exercicio(id):
+    dados = request.json
+    if not dados:
+        return jsonify({"mensagem": "Dados inválidos."}), 400
+        
+    con = obter_conexao()
+    cursor = con.cursor()
+    
+    cursor.execute("SELECT * FROM exercicios WHERE id = ?", (id,))
+    exercicio_atual = cursor.fetchone()
+    if not exercicio_atual:
+        con.close()
+        return jsonify({"mensagem": "Exercício não encontrado."}), 404
+        
+    nome_exercicio = dados.get('nome_exercicio', exercicio_atual['nome_exercicio']).strip()
+    series = dados.get('series', exercicio_atual['series']).strip()
+    repeticoes = dados.get('repeticoes', exercicio_atual['repeticoes']).strip()
+    
+    cursor.execute("UPDATE exercicios SET nome_exercicio = ?, series = ?, repeticoes = ? WHERE id = ?", 
+                   (nome_exercicio, series, repeticoes, id))
+    con.commit()
+    con.close()
+    return jsonify({"mensagem": "Exercício atualizado com sucesso!"})
+
+@app.route('/exercicios/<int:id>', methods=['DELETE'])
+def deletar_exercicio(id):
+    con = obter_conexao()
+    cursor = con.cursor()
+    cursor.execute("SELECT id FROM exercicios WHERE id = ?", (id,))
+    if not cursor.fetchone():
+        con.close()
+        return jsonify({"mensagem": "Exercício não encontrado."}), 404
+        
+    cursor.execute("DELETE FROM exercicios WHERE id = ?", (id,))
+    con.commit()
+    con.close()
+    return jsonify({"mensagem": "Exercício deletado com sucesso!"})
 
 if __name__ == '__main__':
     app.run(port=5000, host='localhost', debug=True)
