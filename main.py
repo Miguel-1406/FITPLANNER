@@ -11,6 +11,7 @@ def input_numero(mensagem):
             return int(input(mensagem).strip())
         except ValueError:
             print("[!] Digite apenas números inteiros.")
+        
 
 def iniciar_banco():
     try:
@@ -443,7 +444,34 @@ def atualizar_meta():
     input("\nPressione Enter...")
 
 
+def concluir_meta():
+    listar_metas()
 
+    try:
+        titulo = input("\nNome da meta concluída: ").strip()
+
+        with sqlite3.connect('fitplanner.db') as con:
+            cur = con.cursor()
+
+            cur.execute("SELECT id FROM metas WHERE titulo = ?", (titulo,))
+            if not cur.fetchone():
+                print("[!] Meta não encontrada.")
+                input("\nPressione Enter...")
+                return
+
+            cur.execute("""
+                UPDATE metas SET concluida = 1 WHERE titulo = ?
+            """, (titulo,))
+            con.commit()
+            print("\n🏆 Meta concluída!")
+
+    except Exception as e:
+        print(f"\nErro: {e}")
+
+    input("\nPressione Enter...")
+
+
+def deletar_meta():
     listar_metas()
 
     try:
