@@ -4,7 +4,131 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
+import os
+import json
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import Flow
+from googleapiclient.discovery import build
+from google.auth.transport.requests import Request
 
+SCOPES = ['https://www.googleapis.com/auth/calendar']
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Só em dev
+
+def get_calendar_service():
+    """Retorna o serviço autenticado do Google Calendar."""
+    creds = None
+    if os.path.exists('token.json'):
+        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+            with open('token.json', 'w') as f:
+                f.write(creds.to_json())
+        else:
+            return None  # Precisa autenticar
+    return build('calendar', 'v3', credentials=creds)
+
+# --- ROTA: Iniciar login com Google ---
+@app.route('/auth/google')
+def auth_google():
+    flow = Flow.from_client_secrets_file(
+        'credentials.json',
+        scopes=SCOPES,
+        redirect_uri='http://localhost:5000/oauth2callback'
+    )
+    auth_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
+    return jsonify({"url": auth_url})
+
+# --- ROTA: Callback do OAuth ---
+@app.route('/oauth2callback')
+def oauth2callback():
+    flow = Flow.from_client_secrets_file(
+        'credentials.json',
+        scopes=SCOPES,
+        redirect_uri='http://localhost:5000/oauth2callback'
+    )
+    flow.fetch_token(authorization_response=request.url)
+    creds = flow.credentials
+    with open('token.json', 'w') as f:
+        f.write(creds.to_json())
+    return jsonify({"mensagem": "Autenticado com sucesso!"})
+
+# --- ROTA: Adicionar treino no Google Agenda ---
+@app.route('/agenda/treino', methods=['POST'])
+def agendar_treino():
+    dados = request.json
+    # Espera: { "treino_id": 1, "data": "2025-06-10", "hora": "07:00", "duracao_min": 60 }
+    if not dados or 'treino_id' not in dados or 'data' not in dados or 'hora' not in dados:
+        return jsonify({"mensagem": "Campos 'treino_id', 'data' e 'hora' são obrigatórios."}), 400
+
+    service = get_calendar_service()
+    if not service:
+        return jsonify({"mensagem": "Não autenticado. Acesse /auth/google primeiro."}), 401
+
+    # Buscar treino no banco
+    con = obter_conexao()
+    cursor = con.cursor()
+    cursor.execute("SELECT nome, tipo, objetivo FROM treinos WHERE id = ?", (dados['treino_id'],))
+    treino = cursor.fetchone()
+    con.close()
+
+    if not treino:
+        return jsonify({"mensagem": "Treino não encontrado."}), 404
+
+    from datetime import datetime, timedelta
+    duracao = dados.get('duracao_min', 60)
+    inicio = datetime.fromisoformat(f"{dados['data']}T{dados['hora']}:00")
+    fim = inicio + timedelta(minutes=duracao)
+
+    evento = {
+        'summary': f'🏋️ Treino: {treino["nome"]}',
+        'description': f'Tipo: {treino["tipo"]}\nObjetivo: {treino["objetivo"]}',
+        'start': {'dateTime': inicio.isoformat(), 'timeZone': 'America/Recife'},
+        'end':   {'dateTime': fim.isoformat(),   'timeZone': 'America/Recife'},
+        'reminders': {
+            'useDefault': False,
+            'overrides': [{'method': 'popup', 'minutes': 30}]
+        }
+    }
+
+    resultado = service.events().insert(calendarId='primary', body=evento).execute()
+    return jsonify({
+        "mensagem": "Treino agendado com sucesso!",
+        "evento_id": resultado['id'],
+        "link": resultado.get('htmlLink')
+    }), 201
+
+# --- ROTA: Listar treinos agendados (próximos 7 dias) ---
+@app.route('/agenda/treinos', methods=['GET'])
+def listar_agenda():
+    service = get_calendar_service()
+    if not service:
+        return jsonify({"mensagem": "Não autenticado."}), 401
+
+    from datetime import datetime, timezone, timedelta
+    agora = datetime.now(timezone.utc).isoformat()
+    fim = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
+
+    eventos = service.events().list(
+        calendarId='primary',
+        timeMin=agora,
+        timeMax=fim,
+        singleEvents=True,
+        orderBy='startTime',
+        q='Treino:'  # Filtra só eventos do FitPlanner
+    ).execute()
+
+    return jsonify(eventos.get('items', []))
+
+# --- ROTA: Deletar evento do Google Agenda ---
+@app.route('/agenda/treino/<evento_id>', methods=['DELETE'])
+def remover_da_agenda(evento_id):
+    service = get_calendar_service()
+    if not service:
+        return jsonify({"mensagem": "Não autenticado."}), 401
+
+    service.events().delete(calendarId='primary', eventId=evento_id).execute()
+    return jsonify({"mensagem": "Evento removido da agenda."})
 def iniciar_banco():
     try:
         with sqlite3.connect('fitplanner.db') as con:
