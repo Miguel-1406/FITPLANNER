@@ -1,6 +1,7 @@
 import sqlite3
 import os
 from datetime import datetime
+from math import log10
 
 
 def limpar_tela():
@@ -12,6 +13,15 @@ def conectar():
     con = sqlite3.connect('fitplanner.db')
     con.execute("PRAGMA foreign_keys = ON")
     return con
+
+
+def input_numero(mensagem):
+    while True:
+        try:
+            return int(input(mensagem).strip())
+        except ValueError:
+            print("[!] Digite apenas números inteiros.")
+
 
 def iniciar_banco():
     try:
@@ -704,6 +714,414 @@ def sugestoes_personalizadas():
             print("[!] Opção inválida! Tente novamente.")
             input("Pressione Enter...")
 
+        input("\nPressione Enter para voltar...")
+        
+def extra():
+    while True:
+        print("=== Funcionalidades Extras ===")
+        print('1- IMC e Planos')
+        print('2- RCQ (Relação cintura-quadril)')
+        print('3- BF (Percentual de gordura corporal)')
+        print('4- IMLG/FFMI (Índice de massa livre de gordura)')
+        choiseextra=int(input('Escolha sua função específica: '))
+        if (choiseextra == 1):
+            print("=== CALCULO DE IMC E DETERMINAÇÂO DE PLANO ===")
+            print('1-Kg')
+            print('2-lb')
+            medidaimc=int(input('Qual será a medida usada:'))
+            print('1-m')
+            print('2-ft')
+            medalturaimc=int(input('qual será a medida da altura:'))
+
+            if (medidaimc == 1 and medalturaimc == 1):
+                pesoimc=float(input('Digite seu peso(kg): '))
+                alturaimc=float(input('Digite sua altura(m): '))
+                if (alturaimc > 3):
+                    alturaimc = alturaimc / 100
+                imc = pesoimc / (alturaimc ** 2)
+
+
+                if (imc < 18.5):
+                        # abaxo do peso
+                        print('Categoria: Abaixo do peso')
+                        print('Plano sugerido:')
+                        print('- Periodo de ganho de massa(foco em caboidratos)')
+                        print('- Exercício 3x por semana')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                elif(imc >= 18.5 and imc <= 24.9):
+                    #    peso normal
+                        print('Categoria: Peso normal')
+                        print('Plano sugerido:')
+                        print('- Periodo de ganho de massa(foco em proteínas)')
+                        print('- Exercício 4x por semana(treino de força)')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                elif(imc >= 25 and imc < 30):
+                        # sobrepeso
+                        print('Categoria: sobrepeso')
+                        print('Plano sugerido:')
+                        print('- Periodo de perda de peso')
+                        print('- Exercício 3x por semana + cardio')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                elif(imc >= 30 and imc < 35):
+                        # Obesidade grau 1
+                        print('Categoria: Obesidade grau 1')
+                        print('Plano sugerido:')
+                        print('- Periodo de perda de peso')
+                        print('- Exercício 4x por semana(treino de força) + cardio')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                elif(imc >= 35 and imc < 40):
+                        # Obesidade grau 2
+                        print('Categoria: Obesidade grau 2')
+                        print('Plano sugerido:')
+                        print('- Periodo de perda de peso')
+                        print('- Exercício 4x por semana(treino de hit) + cardio')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                else:
+                        # Obesidade grau 3
+                        print('Categoria: Obesidade grau 3')
+                        print('ATENÇÂO: Você corre riscos de saúde, procure um médico já!')
+                        print('Plano sugerido:')
+                        print('- Periodo de perda de peso')
+                        print('- Exercício 4x por semana + cardio')
+                        print('- Utilização de creatina e whey(opcional)')
+                        print('- Reeducação alimentar\n')
+
+                print('1- Sim')
+                print('2- Não')
+                escolha=int(input('Deseja fazer outro calculo?: '))   
+                if (escolha == 2):
+                    break
+                
+            elif (medidaimc == 1 and medalturaimc == 2):
+                pesoimc=float(input('Digite seu peso(kg): '))
+                alturaimc=float(input('Digite sua altura(ft): '))
+                alturaimcmetros= alturaimc * 0.3048
+                if (alturaimcmetros > 3):
+                    alturaimcmetros = alturaimcmetros / 100
+                imc = pesoimc / (alturaimcmetros ** 2)
+
+
+                if (imc < 18.5):
+                        # abaxo do peso
+                        print('Categoria: Abaixo do peso')
+                        print('Plano sugerido:')
+                        print('- Periodo de ganho de massa(foco em caboidratos)')
+                        print('- Exercício 3x por semana')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                elif(imc >= 18.5 and imc <= 24.9):
+                    #    peso normal
+                        print('Categoria: Peso normal')
+                        print('Plano sugerido:')
+                        print('- Periodo de ganho de massa(foco em proteínas)')
+                        print('- Exercício 4x por semana(treino de força)')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                elif(imc >= 25 and imc < 30):
+                        # sobrepeso
+                        print('Categoria: sobrepeso')
+                        print('Plano sugerido:')
+                        print('- Periodo de perda de peso')
+                        print('- Exercício 3x por semana + cardio')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                elif(imc >= 30 and imc < 35):
+                        # Obesidade grau 1
+                        print('Categoria: Obesidade grau 1')
+                        print('Plano sugerido:')
+                        print('- Periodo de perda de peso')
+                        print('- Exercício 4x por semana(treino de força) + cardio')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                elif(imc >= 35 and imc < 40):
+                        # Obesidade grau 2
+                        print('Categoria: Obesidade grau 2')
+                        print('Plano sugerido:')
+                        print('- Periodo de perda de peso')
+                        print('- Exercício 4x por semana(treino de hit) + cardio')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                else:
+                        # Obesidade grau 3
+                        print('Categoria: Obesidade grau 3')
+                        print('ATENÇÂO: Você corre riscos de saúde, procure um médico já!')
+                        print('Plano sugerido:')
+                        print('- Periodo de perda de peso')
+                        print('- Exercício 4x por semana + cardio')
+                        print('- Utilização de creatina e whey(opcional)')
+                        print('- Reeducação alimentar\n')
+
+                print('1- Sim')
+                print('2- Não')
+                escolha=int(input('Deseja fazer outro calculo?: '))   
+                if (escolha == 2):
+                    break
+                
+            elif (medidaimc == 2 and medalturaimc == 1):
+                pesoimc=float(input('Digite seu peso(lb): '))
+                alturaimc=float(input('Digite sua altura(m): '))
+                pesoimckg= pesoimc * 0.4535
+                if (alturaimc > 3):
+                    alturaimc = alturaimc / 100
+                imc = pesoimckg / (alturaimc ** 2)
+
+
+                if (imc < 18.5):
+                        # abaxo do peso
+                        print('Categoria: Abaixo do peso')
+                        print('Plano sugerido:')
+                        print('- Periodo de ganho de massa(foco em caboidratos)')
+                        print('- Exercício 3x por semana')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                elif(imc >= 18.5 and imc <= 24.9):
+                    #    peso normal
+                        print('Categoria: Peso normal')
+                        print('Plano sugerido:')
+                        print('- Periodo de ganho de massa(foco em proteínas)')
+                        print('- Exercício 4x por semana(treino de força)')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                elif(imc >= 25 and imc < 30):
+                        # sobrepeso
+                        print('Categoria: sobrepeso')
+                        print('Plano sugerido:')
+                        print('- Periodo de perda de peso')
+                        print('- Exercício 3x por semana + cardio')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                elif(imc >= 30 and imc < 35):
+                        # Obesidade grau 1
+                        print('Categoria: Obesidade grau 1')
+                        print('Plano sugerido:')
+                        print('- Periodo de perda de peso')
+                        print('- Exercício 4x por semana(treino de força) + cardio')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                elif(imc >= 35 and imc < 40):
+                        # Obesidade grau 2
+                        print('Categoria: Obesidade grau 2')
+                        print('Plano sugerido:')
+                        print('- Periodo de perda de peso')
+                        print('- Exercício 4x por semana(treino de hit) + cardio')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                else:
+                        # Obesidade grau 3
+                        print('Categoria: Obesidade grau 3')
+                        print('ATENÇÂO: Você corre riscos de saúde, procure um médico já!')
+                        print('Plano sugerido:')
+                        print('- Periodo de perda de peso')
+                        print('- Exercício 4x por semana + cardio')
+                        print('- Utilização de creatina e whey(opcional)')
+                        print('- Reeducação alimentar\n')
+
+                print('1- Sim')
+                print('2- Não')
+                escolha=int(input('Deseja fazer outro calculo?: '))   
+                if (escolha == 2):
+                    break
+                
+            elif (medidaimc== 2 and medalturaimc== 2):
+                pesoimc=float(input('Digite seu peso(kg): '))
+                alturaimc=float(input('Digite sua altura(ft): '))
+
+                alturaimcmetros= alturaimc * 0.3048
+                pesoimckg= pesoimc * 0.4535
+
+                if (alturaimcmetros > 3):
+                    alturaimcmetros = alturaimcmetros / 100
+                imc = pesoimckg / (alturaimcmetros ** 2)
+
+
+                if (imc < 18.5):
+                        # abaxo do peso
+                        print('Categoria: Abaixo do peso')
+                        print('Plano sugerido:')
+                        print('- Periodo de ganho de massa(foco em caboidratos)')
+                        print('- Exercício 3x por semana')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                elif(imc >= 18.5 and imc <= 24.9):
+                    #    peso normal
+                        print('Categoria: Peso normal')
+                        print('Plano sugerido:')
+                        print('- Periodo de ganho de massa(foco em proteínas)')
+                        print('- Exercício 4x por semana(treino de força)')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                elif(imc >= 25 and imc < 30):
+                        # sobrepeso
+                        print('Categoria: sobrepeso')
+                        print('Plano sugerido:')
+                        print('- Periodo de perda de peso')
+                        print('- Exercício 3x por semana + cardio')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                elif(imc >= 30 and imc < 35):
+                        # Obesidade grau 1
+                        print('Categoria: Obesidade grau 1')
+                        print('Plano sugerido:')
+                        print('- Periodo de perda de peso')
+                        print('- Exercício 4x por semana(treino de força) + cardio')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                elif(imc >= 35 and imc < 40):
+                        # Obesidade grau 2
+                        print('Categoria: Obesidade grau 2')
+                        print('Plano sugerido:')
+                        print('- Periodo de perda de peso')
+                        print('- Exercício 4x por semana(treino de hit) + cardio')
+                        print('- Utilização de creatina e whey(opcional)\n')
+                else:
+                        # Obesidade grau 3
+                        print('Categoria: Obesidade grau 3')
+                        print('ATENÇÂO: Você corre riscos de saúde, procure um médico já!')
+                        print('Plano sugerido:')
+                        print('- Periodo de perda de peso')
+                        print('- Exercício 4x por semana + cardio')
+                        print('- Utilização de creatina e whey(opcional)')
+                        print('- Reeducação alimentar\n')
+
+                print('1- Sim')
+                print('2- Não')
+                escolha=int(input('Deseja fazer outro calculo?: '))   
+                if (escolha == 2):
+                    break
+                
+        # RCQ
+        elif(choiseextra == 2):
+            cintura=float(input('\nDigite a medida da sua cintura(cm): '))
+            quadril=float(input('Digite a medida do seu quadril(cm): '))
+            print('1- Homem')
+            print('2- Mulher')
+            genero=int(input('Qual o seu genero?: '))
+            
+            rcq = cintura / quadril
+            
+            print(f'\nseu RCQ é {rcq:.2f}')
+            if(genero == 1):
+                 if (rcq < 0.90):
+                     print ('Classificação: Baixo risco\n')
+                 elif (rcq >= 0.90 and rcq <= 0.99):
+                     print('Classificação: Risco moderado\n')
+                 else:
+                    print('Classificação: Alto risco\n')
+                    
+            elif(genero == 2):
+                 if (rcq < 0.80):
+                     print ('Classificação: Baixo risco\n')
+                 elif (rcq >= 0.80 and rcq <= 0.84):
+                     print('Classificação: Risco moderado\n')
+                 else:
+                    print('Classificação: Alto risco\n')
+            else:
+                print('Opção inválida\n')
+            
+            print('1- Sim')
+            print('2- Não')
+            escolha=int(input('Deseja fazer outro calculo?: '))   
+            if (escolha == 2):
+              break
+           
+           
+        #BF 
+        elif(choiseextra == 3):
+            print('1- Homem')
+            print('2- Mulher')
+            genero=int(input('Qual o seu genero?:'))
+            if (genero == 1):
+                altura=float(input('Qual a sua altura?(cm): '))
+                pescoço=float(input('Qual a medida do seu pescoço?(cm): '))
+                cintura=float(input('Qual a medida da sua cintura?(cm): '))
+
+                bfh= 86.010 * log10(cintura - pescoço) - 70.041 * log10(altura) + 36.76
+                
+                print(f'\nSeu percentual de gordura é {bfh:.1f}%')
+                
+                if(bfh >= 2 and bfh  <= 5):
+                    print('Essencial/Atleta alto nivel\n')
+                elif (bfh > 5 and bfh <= 13):
+                    print('Atleta\n')
+                elif (bfh > 13 and bfh <= 17):
+                    print('Saudavel\n')
+                elif (bfh > 17 and bfh <= 24):
+                    print('Medio\n')
+                else:
+                    print('Obeso\n')
+                    
+                print('1- Sim')
+                print('2- Não')
+                escolha=int(input('Deseja fazer outro calculo?: '))   
+                if (escolha == 2):
+                  break
+            elif (genero == 2):
+                altura=float(input('Qual a sua altura?(cm): '))
+                pescoço=float(input('Qual a medida do seu pescoço?(cm): '))
+                cintura=float(input('Qual a medida da sua cintura?(cm): '))
+                quadril=float(input('Digite a medida do seu quadril(cm): '))
+
+                bfm= 163.205 * log10(cintura + quadril - pescoço) - 97.684 * log10(altura) - 78.387
+                
+                print(f'\nSeu percentual de gordura é {bfm:.1f}%')
+                
+                if(bfm >= 10 and bfh  <= 13):
+                    print('Essencial/Atleta alto nivel\n')
+                elif (bfm > 14 and bfh <= 20):
+                    print('Atleta\n')
+                elif (bfm > 21 and bfh <= 24):
+                    print('Saudavel\n')
+                elif (bfm > 25 and bfh <= 31):
+                    print('Medio\n')
+                else:
+                    print('Obeso\n')
+                    
+                print('1- Sim')
+                print('2- Não')
+                escolha=int(input('Deseja fazer outro calculo?: '))   
+                if (escolha == 2):
+                  break
+              
+            #   IMGL/FFMI
+        else:
+            peso=float(input('Digite seu peso(kg): '))
+            altura=float(input('Digite sua altura(m): '))
+            bf=float(input('Digite a porcentagem da sua gordura corporal(BF): '))
+            print('1- Homem')
+            print('2- Mulher')
+            genero=int(input('Qual seu gênero? '))
+            if (genero == 1):
+                
+                mlg = peso * (1 - (bf / 100))
+                imlg = mlg / (altura ** 2)
+            
+                print(f'Seu IMLG é {imlg:.2f}')
+                
+                if(imlg < 18):
+                    print('Baixo')
+                elif(imlg >= 18 and imlg == 20):
+                    print('Medio')
+                elif(imlg >= 20 and imlg == 22):
+                    print('Bom')
+                elif(imlg >= 22 and imlg == 25):
+                    print('Excelente')
+                else:
+                    print('Muito elevado')
+                
+                print('1- Sim')
+                print('2- Não')
+                escolha=int(input('Deseja fazer outro calculo?: '))   
+                if (escolha == 2):
+                  break
+            else:
+                mlg = peso * (1 - (bf / 100))
+                imlg = mlg / (altura ** 2)
+            
+                print(f'Seu IMLG é {imlg:.2f}')
+                
+                if(imlg < 14):
+                    print('Baixo')
+                elif(imlg >= 14 and imlg == 16):
+                    print('Medio')
+                elif(imlg >= 16 and imlg == 18):
+                    print('Bom')
+                elif(imlg >= 18 and imlg == 20):
+                    print('Excelente')
+                else:
+                    print('Muito elevado')
+                
+                print('1- Sim')
+                print('2- Não')
+                escolha=int(input('Deseja fazer outro calculo?: '))   
+                if (escolha == 2):
+                  break
+
 iniciar_banco()
 
 while True:
@@ -737,11 +1155,10 @@ while True:
         sugestoes_personalizadas()
     elif opcao == '7':
         print("\n--- Funcionalidade Extra ---")
-        print("[!] Funcionalidade em desenvolvimento.")
-        input("\nPressione Enter para voltar...")
+        extra()
     elif opcao == '8':
-        print("\nSaindo do sistema... Bom treino! 💪")
+        print("Saindo do sistema... Bom treino!")
         break
     else:
-        print("[!] Opção inválida! Tente novamente.")
+        print("Opção inválida! Tente novamente.")
         input("Pressione Enter...")
