@@ -13,15 +13,6 @@ def conectar():
     con.execute("PRAGMA foreign_keys = ON")
     return con
 
-
-def input_numero(mensagem):
-    while True:
-        try:
-            return int(input(mensagem).strip())
-        except ValueError:
-            print("[!] Digite apenas números inteiros.")
-
-
 def iniciar_banco():
     try:
         with conectar() as con:
@@ -712,8 +703,6 @@ def sugestoes_personalizadas():
         else:
             print("[!] Opção inválida! Tente novamente.")
             input("Pressione Enter...")
-
-        input("\nPressione Enter para voltar...")
 
 iniciar_banco()
 
