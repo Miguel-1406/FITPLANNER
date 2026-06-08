@@ -24,7 +24,7 @@ def iniciar_banco():
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     nome TEXT NOT NULL UNIQUE,
                     tipo TEXT,
-                    objetivo TEXT,
+                    objective TEXT,
                     data_criacao TEXT NOT NULL
                 )
             ''')
@@ -247,7 +247,7 @@ def menu_editar():
                         cur.execute("UPDATE treinos SET nome = ?, tipo = ?, objetivo = ? WHERE id = ?", 
                                     (novo_nome, novo_tipo, novo_obj, treino_id))
                         con.commit()
-                        print("\nTreino atualizado com sucesso!")
+                        print("\nTreino updated com sucesso!")
             except sqlite3.Error as e:
                 print(f"\n[!] Erro ao editar treino: {e}")
             input("Pressione Enter...")
@@ -310,6 +310,7 @@ def menu_editar():
             
         elif escolha == '0':
             break
+
 def menu_metas():
      while True:
         limpar_tela()
@@ -341,6 +342,7 @@ def menu_metas():
 
         elif opcao == '0':
             break
+
 def criar_meta():
     limpar_tela()
 
@@ -495,6 +497,65 @@ def deletar_meta():
 
     input("\nPressione Enter...")
 
+# Nova funcionalidade para a Opção 6
+def menu_sugestoes_personalizadas():
+    while True:
+        limpar_tela()
+        print("=== SUGESTÕES PERSONALIZADAS ===")
+        print("Selecione um plano de treino recomendado:")
+        print("1. Recomendação: Peito e Tríceps")
+        print("2. Recomendação: Costas e Bíceps")
+        print("3. Recomendação: Pernas Completo")
+        print("0. Voltar")
+
+        escolha = input("\n-> ")
+
+        if escolha == '1':
+            limpar_tela()
+            print("=== TREINO RECOMENDADO: PEITO E TRÍCEPS ===")
+            print("Objetivo: Hipertrofia / Fortalecimento")
+            print("-" * 50)
+            print("Exercício 1: Supino Reto com Barra       | Séries: 4 | Repetições: 10")
+            print("Exercício 2: Supino Inclinado c/ Halter  | Séries: 4 | Repetições: 12")
+            print("Exercício 3: Crossover na Polia          | Séries: 3 | Repetições: 15")
+            print("Exercício 4: Tríceps Pulley (Corda)      | Séries: 4 | Repetições: 12")
+            print("Exercício 5: Tríceps Testa na Barra W    | Séries: 3 | Repetições: 10")
+            print("-" * 50)
+            input("\nPressione Enter para voltar às sugestões...")
+
+        elif escolha == '2':
+            limpar_tela()
+            print("=== TREINO RECOMENDADO: COSTAS E BÍCEPS ===")
+            print("Objetivo: Hipertrofia / Fortalecimento")
+            print("-" * 50)
+            print("Exercício 1: Puxada Alta (Pulldown)      | Séries: 4 | Repetições: 10")
+            print("Exercício 2: Remada Curvada com Barra    | Séries: 4 | Repetições: 10")
+            print("Exercício 3: Remada Baixa (Triângulo)    | Séries: 3 | Repetições: 12")
+            print("Exercício 4: Rosca Direta com Barra      | Séries: 4 | Repetições: 10")
+            print("Exercício 5: Rosca Alternada c/ Halter   | Séries: 3 | Repetições: 12")
+            print("-" * 50)
+            input("\nPressione Enter para voltar às sugestões...")
+
+        elif escolha == '3':
+            limpar_tela()
+            print("=== TREINO RECOMENDADO: PERNAS ===")
+            print("Objetivo: Hipertrofia / Fortalecimento")
+            print("-" * 50)
+            print("Exercício 1: Agachamento Livre           | Séries: 4 | Repetições: 10")
+            print("Exercício 2: Leg Press 45°               | Séries: 4 | Repetições: 12")
+            print("Exercício 3: Cadeira Extensora           | Séries: 3 | Repetições: 15")
+            print("Exercício 4: Mesa Flexora                | Séries: 4 | Repetições: 12")
+            print("Exercício 5: Gêmeos Sentado (Panturrilha)| Séries: 4 | Repetições: 15")
+            print("-" * 50)
+            input("\nPressione Enter para voltar às sugestões...")
+
+        elif escolha == '0':
+            break
+        else:
+            print("[!] Opção inválida! Tente novamente.")
+            input("Pressione Enter...")
+
+
 iniciar_banco()
 
 while True:
@@ -524,8 +585,7 @@ while True:
         print("\n--- Acompanhamento de Evolução ---")
         input("\nPressione Enter para voltar...")
     elif opcao == '6':
-        print("\n--- Sugestões Personalizadas ---")
-        input("\nPressione Enter para voltar...")
+        menu_sugestoes_personalizadas()
     elif opcao == '7':
         print("\n--- Funcionalidade Extra ---")
         input("\nPressione Enter para voltar...")
