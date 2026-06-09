@@ -1,4 +1,3 @@
-
 const API = 'http://localhost:5000';
 let treinosData = [];
 let metasData = [];
@@ -21,14 +20,14 @@ function goPage(p){
   if(p==='calendario') loadCalendario();
 }
 
-// ===================== TOAST =====================
+//  TOAST 
 function toast(msg, dur=2800){
   const t=document.getElementById('toast');
   t.textContent=msg; t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), dur);
 }
 
-// ===================== MODAL =====================
+//  MODAL 
 function openModal(id){
   document.getElementById(id).classList.add('open');
   if(id==='modal-agendar') preencherSelectTreinos();
@@ -38,7 +37,7 @@ document.querySelectorAll('.modal-overlay').forEach(el=>{
   el.addEventListener('click',e=>{if(e.target===el) el.classList.remove('open')});
 });
 
-// ===================== API HELPERS =====================
+//  API HELPERS 
 async function apiFetch(path, opts={}){
   try{
     const r=await fetch(API+path,{headers:{'Content-Type':'application/json'},...opts});
@@ -49,7 +48,7 @@ async function apiFetch(path, opts={}){
   }
 }
 
-// ===================== HOME =====================
+//  HOME 
 function buildCalendar(){
   const strip=document.getElementById('cal-strip');
   strip.innerHTML='';
@@ -67,13 +66,13 @@ function buildCalendar(){
 
 async function loadHome(){
   buildCalendar();
-  const data=await apiFetch('/treinos');
-  if(!data) return;
-  treinosData=data;
+  const res=await apiFetch('/treinos');
+  if(!res) return;
+  treinosData = res.dados || res;
   const grid=document.getElementById('home-treinos');
   grid.innerHTML='';
-  if(!data.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">Nenhum treino cadastrado.</div>';return;}
-  data.slice(0,3).forEach(t=>{
+  if(!treinosData.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">Nenhum treino cadastrado.</div>';return;}
+  treinosData.slice(0,3).forEach(t=>{
     const card=document.createElement('div');
     card.className='treino-card-home';
     card.innerHTML=`
@@ -95,18 +94,17 @@ function iniciarTreino(id){
   toast('🏋️ Treino iniciado!');
 }
 
-// ===================== STATUS =====================
+//  STATUS 
 async function loadStatus(){
-  const metas=await apiFetch('/metas');
-  if(!metas) return;
-  metasData=metas;
+  const res=await apiFetch('/metas');
+  if(!res) return;
+  metasData = res.dados || res;
 
-  // Progresso
   const pg=document.getElementById('status-progress');
   pg.innerHTML='';
-  if(!metas.length){pg.innerHTML='<div class="empty" style="grid-column:1/-1">Nenhuma meta cadastrada.</div>';}
+  if(!metasData.length){pg.innerHTML='<div class="empty" style="grid-column:1/-1">Nenhuma meta cadastrada.</div>';}
   else{
-    metas.forEach(m=>{
+    metasData.forEach(m=>{
       const pct=Math.min(100, m.tipo_meta==='perder'
         ? ((m.valor_inicial-m.valor_atual)/(m.valor_inicial-m.valor_meta)*100)||0
         : ((m.valor_atual/m.valor_meta)*100)||0);
@@ -120,12 +118,11 @@ async function loadStatus(){
     });
   }
 
-  // Metas
   const mg=document.getElementById('status-metas');
   mg.innerHTML='';
-  if(!metas.length){mg.innerHTML='<div class="empty" style="grid-column:1/-1">Nenhuma meta cadastrada.</div>';}
+  if(!metasData.length){mg.innerHTML='<div class="empty" style="grid-column:1/-1">Nenhuma meta cadastrada.</div>';}
   else{
-    metas.forEach(m=>{
+    metasData.forEach(m=>{
       const card=document.createElement('div');
       card.className='meta-card';
       card.innerHTML=`
@@ -164,19 +161,19 @@ async function deletarMeta(id){
   toast('🗑️ Meta removida');loadStatus();
 }
 
-// ===================== PLANOS =====================
+//  PLANOS 
 async function loadPlanos(){
-  const treinos=await apiFetch('/treinos');
-  if(!treinos) return;
-  treinosData=treinos;
+  const res=await apiFetch('/treinos');
+  if(!res) return;
+  treinosData = res.dados || res;
 
-  const musc=treinos.filter(t=>(t.tipo||'').toLowerCase().includes('musculação')||(t.tipo||'').toLowerCase().includes('musculacao'));
-  const card=treinos.filter(t=>(t.tipo||'').toLowerCase().includes('cardio'));
-  const outros=treinos.filter(t=>!musc.includes(t)&&!card.includes(t));
+  const musc=treinosData.filter(t=>(t.tipo||'').toLowerCase().includes('musculação')||(t.tipo||'').toLowerCase().includes('musculacao'));
+  const card=treinosData.filter(t=>(t.tipo||'').toLowerCase().includes('cardio'));
+  const outros=treinosData.filter(t=>!musc.includes(t)&&!card.includes(t));
   const todos=[...musc,...outros];
 
-  renderPlanoGrid('grid-musculacao', todos.length?todos:treinos.slice(0,3));
-  renderPlanoGrid('grid-cardio', card.length?card:treinos.slice(0,3));
+  renderPlanoGrid('grid-musculacao', todos.length?todos:treinosData.slice(0,3));
+  renderPlanoGrid('grid-cardio', card.length?card:treinosData.slice(0,3));
 }
 
 function renderPlanoGrid(gridId, items){
@@ -211,15 +208,15 @@ async function verPlano(id){
   openModal('modal-exercicio');
 }
 
-// ===================== TREINOS =====================
+//  TREINOS 
 async function loadTreinos(){
-  const data=await apiFetch('/treinos');
-  if(!data) return;
-  treinosData=data;
+  const res=await apiFetch('/treinos');
+  if(!res) return;
+  treinosData = res.dados || res;
   const list=document.getElementById('treinos-list');
   list.innerHTML='';
-  if(!data.length){list.innerHTML='<div class="empty">Nenhum treino cadastrado.</div>';return;}
-  data.forEach(t=>{
+  if(!treinosData.length){list.innerHTML='<div class="empty">Nenhum treino cadastrado.</div>';return;}
+  treinosData.forEach(t=>{
     const card=document.createElement('div');
     card.className='card';
     card.style.marginBottom='12px';
@@ -315,7 +312,7 @@ async function deletarTreino(id){
   toast('🗑️ Treino removido');loadTreinos();loadHome();
 }
 
-// ===================== METAS =====================
+//  METAS 
 async function salvarMeta(){
   const titulo=document.getElementById('m-titulo').value.trim();
   const atual=document.getElementById('m-atual').value;
@@ -334,18 +331,25 @@ async function salvarMeta(){
   }else{toast(r?.mensagem||'Erro');}
 }
 
-// ===================== CALENDARIO =====================
+//  CALENDARIO 
 async function loadCalendario(){
-  checkGoogleStatus();
-  await loadAgenda();
+  await checkGoogleStatus();
 }
 
-function checkGoogleStatus(){
-  // Tenta verificar se já está autenticado fazendo um GET na agenda
-  fetch(API+'/agenda/treinos').then(r=>r.json()).then(d=>{
-    if(Array.isArray(d)){setGoogleConnected(true);agendaData=d;renderAgenda();}
-    else{setGoogleConnected(false);}
-  }).catch(()=>setGoogleConnected(false));
+async function checkGoogleStatus(){
+  try{
+    const r = await fetch(API+'/agenda/treinos');
+    const d = await r.json();
+    if(Array.isArray(d)){
+      setGoogleConnected(true);
+      agendaData=d;
+      renderAgenda();
+    }else{
+      setGoogleConnected(false);
+    }
+  }catch(e){
+    setGoogleConnected(false);
+  }
 }
 
 function setGoogleConnected(v){
@@ -371,9 +375,14 @@ async function conectarGoogle(){
   const r=await apiFetch('/auth/google');
   if(r&&r.url){
     toast('Abrindo Google...');
-    window.open(r.url,'_blank','width=500,height=600');
-    // Após ~5s tenta reconectar
-    setTimeout(()=>checkGoogleStatus(), 5000);
+    const popup = window.open(r.url,'_blank','width=500,height=600');
+    // Verifica status a cada 2s por até 30s
+    let tentativas = 0;
+    const intervalo = setInterval(async ()=>{
+      tentativas++;
+      await checkGoogleStatus();
+      if(googleConnected || tentativas >= 15) clearInterval(intervalo);
+    }, 2000);
   }else{toast('API não disponível');}
 }
 
@@ -420,7 +429,6 @@ async function removerEvento(id){
 function preencherSelectTreinos(){
   const sel=document.getElementById('ag-treino-id');
   sel.innerHTML='';
-  // Definir data mínima como hoje
   const hoje=new Date().toISOString().split('T')[0];
   document.getElementById('ag-data').min=hoje;
   document.getElementById('ag-data').value=hoje;
@@ -447,10 +455,10 @@ async function agendarTreino(){
   }else{toast(r?.mensagem||'Erro ao agendar');}
 }
 
-// ===================== INIT =====================
+//  INIT 
 async function init(){
-  const treinos=await apiFetch('/treinos');
-  if(treinos) treinosData=treinos;
+  const res = await apiFetch('/treinos');
+  if(res) treinosData = res.dados || res;
   loadHome();
 }
 init();

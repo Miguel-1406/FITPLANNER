@@ -75,7 +75,7 @@ def agendar_treino():
 
     evento = {
         'summary': f'🏋️ Treino: {treino["nome"]}',
-        'description': f'Tipo: {treino["tipo"]}\nObjetivo: {treino["objective"] if "objective" in treino.keys() else treino["objetivo"]}',
+        'description': f'Tipo: {treino["tipo"]}\nObjetivo: {treino["objetivo"]}',
         'start': {'dateTime': inicio.isoformat(), 'timeZone': 'America/Recife'},
         'end':   {'dateTime': fim.isoformat(),   'timeZone': 'America/Recife'},
         'reminders': {
